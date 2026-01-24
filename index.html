@@ -3,72 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить расход</title>
+    <title>Финансы</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); padding: 20px; }
-        label { display: block; margin-top: 15px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; background-color: var(--tg-theme-secondary-bg-color, #f0f0f0); color: var(--tg-theme-text-color, #000); }
-        button { width: 100%; padding: 15px; margin-top: 25px; background-color: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #fff); border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        body { font-family: sans-serif; background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); padding: 20px; padding-bottom: 80px; }
+        h3 { margin-top: 0; }
+        
+        /* Стили полей ввода */
+        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: var(--tg-theme-hint-color, #888); }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid #ccc; box-sizing: border-box; background-color: var(--tg-theme-secondary-bg-color, #f0f0f0); color: var(--tg-theme-text-color, #000); font-size: 16px; }
+        
+        /* Кнопки */
+        .main-btn { width: 100%; padding: 15px; margin-top: 25px; background-color: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #fff); border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .secondary-btn { width: 100%; padding: 15px; margin-top: 15px; background-color: var(--tg-theme-secondary-bg-color, #f0f0f0); color: var(--tg-theme-text-color, #000); border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+
         .row { display: flex; gap: 10px; }
         .col { flex: 1; }
+
+        /* Вкладки (Tabs) */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+        /* Нижнее меню */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--tg-theme-secondary-bg-color, #f0f0f0); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ccc; }
+        .nav-item { flex: 1; text-align: center; cursor: pointer; opacity: 0.6; font-size: 12px; }
+        .nav-item.active { opacity: 1; font-weight: bold; color: var(--tg-theme-button-color, #2481cc); }
+        .nav-icon { font-size: 24px; display: block; margin-bottom: 2px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
-    <h3>💸 Записать трату</h3>
-    
-    <label>Название товара</label>
-    <input type="text" id="item_name" placeholder="Например: Шаурма">
 
-    <div class="row">
-        <div class="col">
-            <label>Сумма</label>
-            <input type="number" id="price" placeholder="0" step="0.01">
+    <div id="tab-expense" class="tab-content active">
+        <h3>💸 Новая трата</h3>
+        <label>На что потратил?</label>
+        <input type="text" id="item_name" placeholder="Например: Такси">
+
+        <div class="row">
+            <div class="col">
+                <label>Сумма</label>
+                <input type="number" id="price" placeholder="0" inputmode="decimal" step="0.01">
+            </div>
+            <div class="col">
+                <label>Валюта</label>
+                <select id="currency">
+                    <option value="AZN">₼ AZN</option>
+                    <option value="RUB">₽ RUB</option>
+                </select>
+            </div>
         </div>
-        <div class="col">
-            <label>Валюта</label>
-            <select id="currency">
-                <option value="AZN">₼ (AZN)</option>
-                <option value="RUB">₽ (RUB)</option>
-            </select>
+
+        <label>Категория</label>
+        <select id="category_select">
+            <option value="Еда">🍔 Еда</option>
+            <option value="Транспорт">🚕 Транспорт</option>
+            <option value="Офис">📎 Офис</option>
+            <option value="Зарплата">💰 Зарплата</option>
+            <option value="Прочее">📦 Прочее</option>
+        </select>
+
+        <button class="main-btn" onclick="sendExpense()">Сохранить</button>
+    </div>
+
+    <div id="tab-category" class="tab-content">
+        <h3>📂 Создать категорию</h3>
+        <p style="color: #888; font-size: 14px;">Создайте новую категорию или добавьте правило для существующей.</p>
+        
+        <label>Название категории</label>
+        <input type="text" id="new_cat_name" placeholder="Например: Ремонт">
+        
+        <label>Ключевое слово (пример)</label>
+        <input type="text" id="new_cat_word" placeholder="Например: Обои">
+
+        <button class="main-btn" onclick="sendCategory()">Создать</button>
+    </div>
+
+    <div id="tab-actions" class="tab-content">
+        <h3>⚙️ Управление</h3>
+        
+        <button class="secondary-btn" onclick="sendAction('get_stats')">📊 Получить статистику</button>
+        <button class="secondary-btn" onclick="sendAction('get_file')">📂 Скачать Excel файл</button>
+        <button class="secondary-btn" style="color: red;" onclick="sendAction('delete_menu')">🗑 Удалить записи</button>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('expense', this)">
+            <span class="nav-icon">💸</span>Траты
+        </div>
+        <div class="nav-item" onclick="switchTab('category', this)">
+            <span class="nav-icon">➕</span>Категории
+        </div>
+        <div class="nav-item" onclick="switchTab('actions', this)">
+            <span class="nav-icon">⚙️</span>Меню
         </div>
     </div>
 
-    <label>Категория</label>
-    <select id="category">
-        <option value="Еда">🍔 Еда</option>
-        <option value="Транспорт">🚕 Транспорт</option>
-        <option value="Офис">📎 Офис</option>
-        <option value="Зарплата">💰 Зарплата</option>
-        <option value="Прочее">📦 Прочее</option>
-    </select>
-
-    <button onclick="sendData()">Сохранить</button>
-
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрыть на весь экран
+        tg.expand();
 
-        function sendData() {
+        // Переключение вкладок
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // Отправка ТРАТЫ
+        function sendExpense() {
             let item = document.getElementById("item_name").value;
             let price = document.getElementById("price").value;
             let currency = document.getElementById("currency").value;
-            let category = document.getElementById("category").value;
+            let category = document.getElementById("category_select").value;
 
-            if (!item || !price) {
-                alert("Заполните название и сумму!");
-                return;
-            }
+            if (!item || !price) { tg.showAlert("Заполните название и сумму!"); return; }
 
-            // Формируем данные для отправки боту
             let data = {
+                action: 'add_expense', // Метка для бота
                 title: item,
                 price: price,
                 curr: currency,
                 cat: category
             };
+            tg.sendData(JSON.stringify(data));
+        }
 
-            // Отправляем и закрываем
+        // Отправка НОВОЙ КАТЕГОРИИ
+        function sendCategory() {
+            let catName = document.getElementById("new_cat_name").value;
+            let catWord = document.getElementById("new_cat_word").value;
+
+            if (!catName || !catWord) { tg.showAlert("Заполните оба поля!"); return; }
+
+            let data = {
+                action: 'add_category', // Метка для бота
+                cat_name: catName,
+                word: catWord
+            };
+            tg.sendData(JSON.stringify(data));
+        }
+
+        // Отправка КОМАНД (Статистика, Файл)
+        function sendAction(actionName) {
+            let data = { action: actionName };
             tg.sendData(JSON.stringify(data));
         }
     </script>
