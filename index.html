@@ -15,27 +15,21 @@
             --hint-color: var(--tg-theme-hint-color, #8e8e93);
             --accent-color: var(--tg-theme-button-color, #007aff);
             --button-text: var(--tg-theme-button-text-color, #ffffff);
-            --shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            padding-bottom: 90px;
+            margin: 0; padding: 20px; padding-bottom: 90px;
             -webkit-tap-highlight-color: transparent;
         }
 
         h3 { margin-top: 10px; margin-bottom: 20px; font-weight: 700; font-size: 22px; }
 
         .card {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
+            background-color: var(--card-bg); border-radius: 16px; padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px;
         }
 
         label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--hint-color); text-transform: uppercase; }
@@ -45,12 +39,13 @@
             background-color: var(--bg-color); color: var(--text-color); font-size: 17px;
             outline: none; box-sizing: border-box; margin-bottom: 15px;
         }
+        
+        input:focus, select:focus { border: 1px solid var(--accent-color); background-color: #fff; }
 
         .main-btn {
             width: 100%; padding: 16px; background-color: var(--accent-color); color: var(--button-text);
             border: none; border-radius: 14px; font-size: 17px; font-weight: 600; cursor: pointer;
         }
-        
         .main-btn:active { transform: scale(0.98); opacity: 0.9; }
 
         .secondary-btn {
@@ -58,8 +53,7 @@
             color: var(--text-color); border: none; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer;
         }
 
-        .row { display: flex; gap: 12px; }
-        .col { flex: 1; }
+        .row { display: flex; gap: 12px; } .col { flex: 1; }
         
         .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
         .tab-content.active { display: block; }
@@ -85,7 +79,8 @@
         <h3>💸 Новая трата</h3>
         <div class="card">
             <label>Название</label>
-            <input type="text" id="item_name" placeholder="Что купили?">
+            <input type="text" id="item_name" placeholder="Например: Обед">
+
             <div class="row">
                 <div class="col">
                     <label>Сумма</label>
@@ -99,36 +94,34 @@
                     </select>
                 </div>
             </div>
+
             <label>Категория</label>
-            <select id="category_select">
-                <option value="Еда">🍔 Еда</option>
-                <option value="Транспорт">🚕 Транспорт</option>
-                <option value="Офис">📎 Офис</option>
-                <option value="Зарплата">💰 Зарплата</option>
-                <option value="Прочее">📦 Прочее</option>
-            </select>
+            <select id="category_select"></select>
+
             <button class="main-btn" onclick="sendExpense()">Записать</button>
         </div>
     </div>
 
     <div id="tab-category" class="tab-content">
-        <h3>📂 Категории</h3>
+        <h3>📂 Новая категория</h3>
         <div class="card">
             <label>Имя категории</label>
             <input type="text" id="new_cat_name" placeholder="Например: Ремонт">
+            
             <label>Ключевые слова</label>
-            <input type="text" id="new_cat_words" placeholder="Цемент, краска, мастер...">
-            <button class="main-btn" onclick="sendCategory()">Сохранить правило</button>
+            <input type="text" id="new_cat_words" placeholder="Краска, обои, мастер...">
+            
+            <button class="main-btn" onclick="sendCategory()">Создать и Запомнить</button>
         </div>
     </div>
 
     <div id="tab-actions" class="tab-content">
         <h3>⚙️ Управление</h3>
         <div class="card">
-            <button class="secondary-btn" onclick="sendAction('get_stats', 'Запрашиваю статистику...')">📊 Статистика</button>
-            <button class="secondary-btn" onclick="sendAction('get_file', 'Формирую файл Excel...')">📂 Скачать Excel</button>
+            <button class="secondary-btn" onclick="sendAction('get_stats', 'Загрузка...')">📊 Статистика</button>
+            <button class="secondary-btn" onclick="sendAction('get_file', 'Отправка...')">📂 Скачать Excel</button>
             <hr style="border: 0; border-top: 1px solid rgba(0,0,0,0.1); margin: 15px 0;">
-            <button class="secondary-btn" style="color: #ff3b30; background: rgba(255, 59, 48, 0.1);" onclick="sendAction('delete_menu', 'Открываю меню удаления...')">🗑 Удалить записи</button>
+            <button class="secondary-btn" style="color: #ff3b30; background: rgba(255, 59, 48, 0.1);" onclick="sendAction('delete_menu', 'Меню удаления...')">🗑 Удалить записи</button>
         </div>
     </div>
 
@@ -142,14 +135,35 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
+        // 1. Стандартные категории
+        const defaultCategories = ["Еда", "Транспорт", "Офис", "Зарплата", "Прочее"];
+
+        // 2. Функция загрузки категорий (Стандартные + Из памяти телефона)
+        function loadCategories() {
+            let savedCats = JSON.parse(localStorage.getItem('my_categories')) || [];
+            // Объединяем и убираем дубликаты
+            let allCats = [...new Set([...defaultCategories, ...savedCats])];
+            
+            let select = document.getElementById('category_select');
+            select.innerHTML = ""; // Очищаем список
+            
+            allCats.forEach(cat => {
+                let option = document.createElement('option');
+                option.value = cat;
+                option.text = cat; // Можно добавить эмодзи, если хочешь
+                select.appendChild(option);
+            });
+        }
+
+        // Запускаем загрузку сразу при старте
+        loadCategories();
+
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             element.classList.add('active');
         }
-
-        // --- УВЕДОМЛЕНИЯ + ОТПРАВКА ---
 
         function sendExpense() {
             let item = document.getElementById("item_name").value;
@@ -162,24 +176,15 @@
                 return; 
             }
 
-            // Показываем красивый успех
-            Swal.fire({
-                icon: 'success',
-                title: 'Сохранено!',
-                text: `${item} — ${price} ${currency}`,
-                showConfirmButton: false,
-                timer: 1500 // Ждем 1.5 секунды
-            }).then(() => {
-                // И только ПОТОМ отправляем данные
+            Swal.fire({ icon: 'success', title: 'Сохранено!', showConfirmButton: false, timer: 1500 }).then(() => {
                 tg.sendData(JSON.stringify({
-                    action: 'add_expense',
-                    title: item, price: price, curr: currency, cat: category
+                    action: 'add_expense', title: item, price: price, curr: currency, cat: category
                 }));
             });
         }
 
         function sendCategory() {
-            let catName = document.getElementById("new_cat_name").value;
+            let catName = document.getElementById("new_cat_name").value.trim();
             let wordsStr = document.getElementById("new_cat_words").value;
 
             if (!catName || !wordsStr) {
@@ -187,30 +192,32 @@
                  return;
             }
 
+            // 1. Сохраняем новую категорию в память телефона
+            let savedCats = JSON.parse(localStorage.getItem('my_categories')) || [];
+            
+            // Сохраняем с большой буквы
+            let formattedName = catName.charAt(0).toUpperCase() + catName.slice(1);
+            
+            if (!savedCats.includes(formattedName)) {
+                savedCats.push(formattedName);
+                localStorage.setItem('my_categories', JSON.stringify(savedCats));
+                
+                // МГНОВЕННО обновляем список во вкладке "Траты"
+                loadCategories();
+            }
+
             let wordsArray = wordsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Категория создана!',
-                text: `Правила добавлены`,
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
+            Swal.fire({ icon: 'success', title: 'Добавлено!', text: `Категория "${formattedName}" теперь в списке`, showConfirmButton: false, timer: 1500 }).then(() => {
+                // Отправляем боту (чтобы он обновил свои правила для Excel)
                 tg.sendData(JSON.stringify({
-                    action: 'add_category',
-                    cat_name: catName, words: wordsArray
+                    action: 'add_category', cat_name: formattedName, words: wordsArray
                 }));
             });
         }
 
         function sendAction(actionName, msg) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Подождите...',
-                text: msg,
-                showConfirmButton: false,
-                timer: 1000
-            }).then(() => {
+            Swal.fire({ icon: 'info', title: 'Подождите...', text: msg, showConfirmButton: false, timer: 1000 }).then(() => {
                 tg.sendData(JSON.stringify({ action: actionName }));
             });
         }
