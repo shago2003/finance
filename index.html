@@ -2,89 +2,221 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Финансы</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); padding: 20px; padding-bottom: 80px; }
-        h3 { margin-top: 0; }
-        
-        /* Стили полей ввода */
-        label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; color: var(--tg-theme-hint-color, #888); }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid #ccc; box-sizing: border-box; background-color: var(--tg-theme-secondary-bg-color, #f0f0f0); color: var(--tg-theme-text-color, #000); font-size: 16px; }
-        
-        /* Кнопки */
-        .main-btn { width: 100%; padding: 15px; margin-top: 25px; background-color: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #fff); border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .secondary-btn { width: 100%; padding: 15px; margin-top: 15px; background-color: var(--tg-theme-secondary-bg-color, #f0f0f0); color: var(--tg-theme-text-color, #000); border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #f5f5f7);
+            --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+            --text-color: var(--tg-theme-text-color, #000000);
+            --hint-color: var(--tg-theme-hint-color, #8e8e93);
+            --accent-color: var(--tg-theme-button-color, #007aff);
+            --button-text: var(--tg-theme-button-text-color, #ffffff);
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
 
-        .row { display: flex; gap: 10px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 90px; /* Место для меню */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h3 {
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: -0.5px;
+        }
+
+        /* Карточки и поля */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--hint-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 17px;
+            outline: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+
+        input:focus, select:focus {
+            background-color: var(--card-bg);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+        }
+
+        /* Кнопки */
+        .main-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--accent-color);
+            color: var(--button-text);
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .main-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .secondary-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .row { display: flex; gap: 12px; }
         .col { flex: 1; }
 
-        /* Вкладки (Tabs) */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        /* Вкладки */
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
 
         /* Нижнее меню */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--tg-theme-secondary-bg-color, #f0f0f0); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #ccc; }
-        .nav-item { flex: 1; text-align: center; cursor: pointer; opacity: 0.6; font-size: 12px; }
-        .nav-item.active { opacity: 1; font-weight: bold; color: var(--tg-theme-button-color, #2481cc); }
-        .nav-icon { font-size: 24px; display: block; margin-bottom: 2px; }
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        /* Темная тема для меню */
+        @media (prefers-color-scheme: dark) {
+            .bottom-nav { background-color: rgba(30, 30, 30, 0.9); }
+        }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            opacity: 0.5;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+        
+        .nav-item.active {
+            opacity: 1;
+            transform: translateY(-2px);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        .nav-icon {
+            font-size: 22px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div id="tab-expense" class="tab-content active">
         <h3>💸 Новая трата</h3>
-        <label>На что потратил?</label>
-        <input type="text" id="item_name" placeholder="Например: Такси">
+        <div class="card">
+            <label>Название</label>
+            <input type="text" id="item_name" placeholder="Что купили?">
 
-        <div class="row">
-            <div class="col">
-                <label>Сумма</label>
-                <input type="number" id="price" placeholder="0" inputmode="decimal" step="0.01">
+            <div class="row">
+                <div class="col">
+                    <label>Сумма</label>
+                    <input type="number" id="price" placeholder="0.00" inputmode="decimal" step="0.01">
+                </div>
+                <div class="col">
+                    <label>Валюта</label>
+                    <select id="currency">
+                        <option value="AZN">₼ AZN</option>
+                        <option value="RUB">₽ RUB</option>
+                    </select>
+                </div>
             </div>
-            <div class="col">
-                <label>Валюта</label>
-                <select id="currency">
-                    <option value="AZN">₼ AZN</option>
-                    <option value="RUB">₽ RUB</option>
-                </select>
-            </div>
+
+            <label>Категория</label>
+            <select id="category_select">
+                <option value="Еда">🍔 Еда</option>
+                <option value="Транспорт">🚕 Транспорт</option>
+                <option value="Офис">📎 Офис</option>
+                <option value="Зарплата">💰 Зарплата</option>
+                <option value="Прочее">📦 Прочее</option>
+            </select>
+
+            <button class="main-btn" onclick="sendExpense()">Записать</button>
         </div>
-
-        <label>Категория</label>
-        <select id="category_select">
-            <option value="Еда">🍔 Еда</option>
-            <option value="Транспорт">🚕 Транспорт</option>
-            <option value="Офис">📎 Офис</option>
-            <option value="Зарплата">💰 Зарплата</option>
-            <option value="Прочее">📦 Прочее</option>
-        </select>
-
-        <button class="main-btn" onclick="sendExpense()">Сохранить</button>
     </div>
 
     <div id="tab-category" class="tab-content">
-        <h3>📂 Создать категорию</h3>
-        <p style="color: #888; font-size: 14px;">Создайте новую категорию или добавьте правило для существующей.</p>
-        
-        <label>Название категории</label>
-        <input type="text" id="new_cat_name" placeholder="Например: Ремонт">
-        
-        <label>Ключевое слово (пример)</label>
-        <input type="text" id="new_cat_word" placeholder="Например: Обои">
+        <h3>📂 Категории</h3>
+        <div class="card">
+            <label>Имя категории</label>
+            <input type="text" id="new_cat_name" placeholder="Например: Ремонт">
+            
+            <label>Ключевые слова</label>
+            <input type="text" id="new_cat_words" placeholder="Цемент, краска, мастер...">
+            <div style="font-size: 12px; color: var(--hint-color); margin-top: -10px; margin-bottom: 15px;">
+                👇 Пишите много слов через запятую
+            </div>
 
-        <button class="main-btn" onclick="sendCategory()">Создать</button>
+            <button class="main-btn" onclick="sendCategory()">Сохранить правило</button>
+        </div>
     </div>
 
     <div id="tab-actions" class="tab-content">
         <h3>⚙️ Управление</h3>
-        
-        <button class="secondary-btn" onclick="sendAction('get_stats')">📊 Получить статистику</button>
-        <button class="secondary-btn" onclick="sendAction('get_file')">📂 Скачать Excel файл</button>
-        <button class="secondary-btn" style="color: red;" onclick="sendAction('delete_menu')">🗑 Удалить записи</button>
+        <div class="card">
+            <button class="secondary-btn" onclick="sendAction('get_stats')">📊 Статистика</button>
+            <button class="secondary-btn" onclick="sendAction('get_file')">📂 Скачать Excel</button>
+            <hr style="border: 0; border-top: 1px solid rgba(0,0,0,0.1); margin: 15px 0;">
+            <button class="secondary-btn" style="color: #ff3b30; background: rgba(255, 59, 48, 0.1);" onclick="sendAction('delete_menu')">🗑 Удалить записи</button>
+        </div>
     </div>
 
     <div class="bottom-nav">
@@ -92,7 +224,7 @@
             <span class="nav-icon">💸</span>Траты
         </div>
         <div class="nav-item" onclick="switchTab('category', this)">
-            <span class="nav-icon">➕</span>Категории
+            <span class="nav-icon">➕</span>Правила
         </div>
         <div class="nav-item" onclick="switchTab('actions', this)">
             <span class="nav-icon">⚙️</span>Меню
@@ -103,16 +235,13 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Переключение вкладок
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabId).classList.add('active');
-            
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             element.classList.add('active');
         }
 
-        // Отправка ТРАТЫ
         function sendExpense() {
             let item = document.getElementById("item_name").value;
             let price = document.getElementById("price").value;
@@ -121,35 +250,35 @@
 
             if (!item || !price) { tg.showAlert("Заполните название и сумму!"); return; }
 
-            let data = {
-                action: 'add_expense', // Метка для бота
+            tg.sendData(JSON.stringify({
+                action: 'add_expense',
                 title: item,
                 price: price,
                 curr: currency,
                 cat: category
-            };
-            tg.sendData(JSON.stringify(data));
+            }));
         }
 
-        // Отправка НОВОЙ КАТЕГОРИИ
         function sendCategory() {
             let catName = document.getElementById("new_cat_name").value;
-            let catWord = document.getElementById("new_cat_word").value;
+            let wordsStr = document.getElementById("new_cat_words").value;
 
-            if (!catName || !catWord) { tg.showAlert("Заполните оба поля!"); return; }
+            if (!catName || !wordsStr) { tg.showAlert("Заполните оба поля!"); return; }
 
-            let data = {
-                action: 'add_category', // Метка для бота
+            // Разбиваем строку по запятым в массив (список)
+            let wordsArray = wordsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+            if (wordsArray.length === 0) { tg.showAlert("Напишите хотя бы одно слово!"); return; }
+
+            tg.sendData(JSON.stringify({
+                action: 'add_category',
                 cat_name: catName,
-                word: catWord
-            };
-            tg.sendData(JSON.stringify(data));
+                words: wordsArray // Отправляем СРАЗУ СПИСОК слов
+            }));
         }
 
-        // Отправка КОМАНД (Статистика, Файл)
         function sendAction(actionName) {
-            let data = { action: actionName };
-            tg.sendData(JSON.stringify(data));
+            tg.sendData(JSON.stringify({ action: actionName }));
         }
     </script>
 </body>
