@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Финансы</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
         :root {
             --bg-color: var(--tg-theme-bg-color, #f5f5f7);
@@ -22,19 +24,12 @@
             color: var(--text-color);
             margin: 0;
             padding: 20px;
-            padding-bottom: 90px; /* Место для меню */
+            padding-bottom: 90px;
             -webkit-tap-highlight-color: transparent;
         }
 
-        h3 {
-            margin-top: 10px;
-            margin-bottom: 20px;
-            font-weight: 700;
-            font-size: 22px;
-            letter-spacing: -0.5px;
-        }
+        h3 { margin-top: 10px; margin-bottom: 20px; font-weight: 700; font-size: 22px; }
 
-        /* Карточки и поля */
         .card {
             background-color: var(--card-bg);
             border-radius: 16px;
@@ -43,117 +38,43 @@
             margin-bottom: 20px;
         }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 13px;
-            color: var(--hint-color);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; color: var(--hint-color); text-transform: uppercase; }
 
         input, select {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid transparent;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-size: 17px;
-            outline: none;
-            transition: all 0.2s;
-            box-sizing: border-box;
-            margin-bottom: 15px;
+            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid transparent;
+            background-color: var(--bg-color); color: var(--text-color); font-size: 17px;
+            outline: none; box-sizing: border-box; margin-bottom: 15px;
         }
 
-        input:focus, select:focus {
-            background-color: var(--card-bg);
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
-        }
-
-        /* Кнопки */
         .main-btn {
-            width: 100%;
-            padding: 16px;
-            background-color: var(--accent-color);
-            color: var(--button-text);
-            border: none;
-            border-radius: 14px;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.1s;
+            width: 100%; padding: 16px; background-color: var(--accent-color); color: var(--button-text);
+            border: none; border-radius: 14px; font-size: 17px; font-weight: 600; cursor: pointer;
         }
-
-        .main-btn:active {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
+        
+        .main-btn:active { transform: scale(0.98); opacity: 0.9; }
 
         .secondary-btn {
-            width: 100%;
-            padding: 14px;
-            margin-top: 10px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
+            width: 100%; padding: 14px; margin-top: 10px; background-color: var(--bg-color);
+            color: var(--text-color); border: none; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer;
         }
 
         .row { display: flex; gap: 12px; }
         .col { flex: 1; }
-
-        /* Вкладки */
+        
         .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
         .tab-content.active { display: block; }
 
-        /* Нижнее меню */
         .bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            z-index: 1000;
+            position: fixed; bottom: 20px; left: 20px; right: 20px;
+            background-color: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+            border-radius: 20px; display: flex; justify-content: space-around;
+            padding: 12px 0; box-shadow: 0 5px 20px rgba(0,0,0,0.1); z-index: 1000;
         }
-        
-        /* Темная тема для меню */
-        @media (prefers-color-scheme: dark) {
-            .bottom-nav { background-color: rgba(30, 30, 30, 0.9); }
-        }
+        @media (prefers-color-scheme: dark) { .bottom-nav { background-color: rgba(30, 30, 30, 0.9); } }
 
-        .nav-item {
-            flex: 1;
-            text-align: center;
-            cursor: pointer;
-            opacity: 0.5;
-            font-size: 11px;
-            transition: all 0.2s;
-        }
-        
-        .nav-item.active {
-            opacity: 1;
-            transform: translateY(-2px);
-            color: var(--accent-color);
-            font-weight: 600;
-        }
-        
-        .nav-icon {
-            font-size: 22px;
-            display: block;
-            margin-bottom: 4px;
-        }
+        .nav-item { flex: 1; text-align: center; cursor: pointer; opacity: 0.5; font-size: 11px; }
+        .nav-item.active { opacity: 1; color: var(--accent-color); font-weight: 600; }
+        .nav-icon { font-size: 22px; display: block; margin-bottom: 4px; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -165,7 +86,6 @@
         <div class="card">
             <label>Название</label>
             <input type="text" id="item_name" placeholder="Что купили?">
-
             <div class="row">
                 <div class="col">
                     <label>Сумма</label>
@@ -179,7 +99,6 @@
                     </select>
                 </div>
             </div>
-
             <label>Категория</label>
             <select id="category_select">
                 <option value="Еда">🍔 Еда</option>
@@ -188,7 +107,6 @@
                 <option value="Зарплата">💰 Зарплата</option>
                 <option value="Прочее">📦 Прочее</option>
             </select>
-
             <button class="main-btn" onclick="sendExpense()">Записать</button>
         </div>
     </div>
@@ -198,13 +116,8 @@
         <div class="card">
             <label>Имя категории</label>
             <input type="text" id="new_cat_name" placeholder="Например: Ремонт">
-            
             <label>Ключевые слова</label>
             <input type="text" id="new_cat_words" placeholder="Цемент, краска, мастер...">
-            <div style="font-size: 12px; color: var(--hint-color); margin-top: -10px; margin-bottom: 15px;">
-                👇 Пишите много слов через запятую
-            </div>
-
             <button class="main-btn" onclick="sendCategory()">Сохранить правило</button>
         </div>
     </div>
@@ -212,23 +125,17 @@
     <div id="tab-actions" class="tab-content">
         <h3>⚙️ Управление</h3>
         <div class="card">
-            <button class="secondary-btn" onclick="sendAction('get_stats')">📊 Статистика</button>
-            <button class="secondary-btn" onclick="sendAction('get_file')">📂 Скачать Excel</button>
+            <button class="secondary-btn" onclick="sendAction('get_stats', 'Запрашиваю статистику...')">📊 Статистика</button>
+            <button class="secondary-btn" onclick="sendAction('get_file', 'Формирую файл Excel...')">📂 Скачать Excel</button>
             <hr style="border: 0; border-top: 1px solid rgba(0,0,0,0.1); margin: 15px 0;">
-            <button class="secondary-btn" style="color: #ff3b30; background: rgba(255, 59, 48, 0.1);" onclick="sendAction('delete_menu')">🗑 Удалить записи</button>
+            <button class="secondary-btn" style="color: #ff3b30; background: rgba(255, 59, 48, 0.1);" onclick="sendAction('delete_menu', 'Открываю меню удаления...')">🗑 Удалить записи</button>
         </div>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('expense', this)">
-            <span class="nav-icon">💸</span>Траты
-        </div>
-        <div class="nav-item" onclick="switchTab('category', this)">
-            <span class="nav-icon">➕</span>Правила
-        </div>
-        <div class="nav-item" onclick="switchTab('actions', this)">
-            <span class="nav-icon">⚙️</span>Меню
-        </div>
+        <div class="nav-item active" onclick="switchTab('expense', this)"><span class="nav-icon">💸</span>Траты</div>
+        <div class="nav-item" onclick="switchTab('category', this)"><span class="nav-icon">➕</span>Правила</div>
+        <div class="nav-item" onclick="switchTab('actions', this)"><span class="nav-icon">⚙️</span>Меню</div>
     </div>
 
     <script>
@@ -242,43 +149,70 @@
             element.classList.add('active');
         }
 
+        // --- УВЕДОМЛЕНИЯ + ОТПРАВКА ---
+
         function sendExpense() {
             let item = document.getElementById("item_name").value;
             let price = document.getElementById("price").value;
             let currency = document.getElementById("currency").value;
             let category = document.getElementById("category_select").value;
 
-            if (!item || !price) { tg.showAlert("Заполните название и сумму!"); return; }
+            if (!item || !price) { 
+                Swal.fire({ icon: 'error', title: 'Ошибка', text: 'Заполните название и сумму!', timer: 1500, showConfirmButton: false });
+                return; 
+            }
 
-            tg.sendData(JSON.stringify({
-                action: 'add_expense',
-                title: item,
-                price: price,
-                curr: currency,
-                cat: category
-            }));
+            // Показываем красивый успех
+            Swal.fire({
+                icon: 'success',
+                title: 'Сохранено!',
+                text: `${item} — ${price} ${currency}`,
+                showConfirmButton: false,
+                timer: 1500 // Ждем 1.5 секунды
+            }).then(() => {
+                // И только ПОТОМ отправляем данные
+                tg.sendData(JSON.stringify({
+                    action: 'add_expense',
+                    title: item, price: price, curr: currency, cat: category
+                }));
+            });
         }
 
         function sendCategory() {
             let catName = document.getElementById("new_cat_name").value;
             let wordsStr = document.getElementById("new_cat_words").value;
 
-            if (!catName || !wordsStr) { tg.showAlert("Заполните оба поля!"); return; }
+            if (!catName || !wordsStr) {
+                 Swal.fire({ icon: 'warning', title: 'Внимание', text: 'Заполните оба поля!', timer: 1500, showConfirmButton: false });
+                 return;
+            }
 
-            // Разбиваем строку по запятым в массив (список)
             let wordsArray = wordsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
 
-            if (wordsArray.length === 0) { tg.showAlert("Напишите хотя бы одно слово!"); return; }
-
-            tg.sendData(JSON.stringify({
-                action: 'add_category',
-                cat_name: catName,
-                words: wordsArray // Отправляем СРАЗУ СПИСОК слов
-            }));
+            Swal.fire({
+                icon: 'success',
+                title: 'Категория создана!',
+                text: `Правила добавлены`,
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                tg.sendData(JSON.stringify({
+                    action: 'add_category',
+                    cat_name: catName, words: wordsArray
+                }));
+            });
         }
 
-        function sendAction(actionName) {
-            tg.sendData(JSON.stringify({ action: actionName }));
+        function sendAction(actionName, msg) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Подождите...',
+                text: msg,
+                showConfirmButton: false,
+                timer: 1000
+            }).then(() => {
+                tg.sendData(JSON.stringify({ action: actionName }));
+            });
         }
     </script>
 </body>
