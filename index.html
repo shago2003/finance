@@ -6,398 +6,128 @@
     <title>Финансы</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <style>
-        :root {
-            /* Цвета iOS */
-            --bg-color: #F2F2F7;
-            --card-bg: #FFFFFF;
-            --text-primary: #000000;
-            --text-secondary: #8E8E93;
-            --accent: #007AFF; /* Apple Blue */
-            --danger: #FF3B30;
-            --separator: #C6C6C8;
-        }
-
-        /* Темная тема (автоматически) */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #000000;
-                --card-bg: #1C1C1E;
-                --text-primary: #FFFFFF;
-                --separator: #38383A;
-            }
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 20px;
-            padding-bottom: 100px; /* Место для меню */
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-
-        h1 {
-            font-size: 30px;
-            font-weight: 700;
-            margin: 10px 0 20px 5px;
-        }
-
-        h2 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            margin-left: 5px;
-        }
-
-        /* Карточки в стиле iOS */
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 25px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .input-group {
-            border-bottom: 0.5px solid var(--separator);
-            padding: 0 16px;
-        }
-
-        .input-group:last-child {
-            border-bottom: none;
-        }
-
-        label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 12px 0;
-            border: none;
-            background: transparent;
-            font-size: 17px;
-            color: var(--text-primary);
-            outline: none;
-        }
-
-        /* Кнопки */
-        .btn-ios {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 16px;
-            width: 100%;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn-ios:active { opacity: 0.7; }
-
-        .btn-secondary {
-            background-color: var(--card-bg);
-            color: var(--accent);
-            margin-top: 10px;
-        }
+        :root { --bg: #F2F2F7; --card: #FFFFFF; --blue: #007AFF; --text: #000; --gray: #8E8E93; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); margin: 0; padding: 20px; padding-bottom: 90px; user-select: none; -webkit-tap-highlight-color: transparent; }
         
-        .btn-danger {
-            color: var(--danger);
-            background-color: rgba(255, 59, 48, 0.1);
-        }
+        h1 { font-size: 24px; font-weight: 700; margin: 10px 0 20px 5px; }
+        .card { background: var(--card); border-radius: 14px; padding: 0 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
+        .row { border-bottom: 1px solid #E5E5EA; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+        .row:last-child { border-bottom: none; }
+        
+        input, select { border: none; font-size: 17px; outline: none; background: transparent; text-align: right; width: 60%; color: var(--blue); font-weight: 500; }
+        label { font-size: 16px; }
+        
+        .btn { width: 100%; padding: 16px; background: var(--blue); color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .btn:active { opacity: 0.8; transform: scale(0.98); }
 
-        /* Вкладки */
-        .tab-content { display: none; animation: fadeIn 0.2s ease-in-out; }
-        .tab-content.active { display: block; }
-
-        /* Описание в Инфо */
-        .info-text {
-            padding: 16px;
-            font-size: 15px;
-            line-height: 1.5;
-            color: var(--text-primary);
+        /* Меню снизу */
+        .tab-bar { 
+            position: fixed; bottom: 20px; left: 20px; right: 20px; 
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); 
+            border-radius: 20px; display: flex; justify-content: space-around; 
+            padding: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.15); 
+            z-index: 1000; /* ВАЖНО: Чтобы меню было поверх всего */
         }
-        .step {
-            display: flex;
-            align-items: start;
-            margin-bottom: 15px;
-        }
-        .step-num {
-            background: var(--accent);
-            color: white;
-            min-width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 24px;
-            font-size: 14px;
-            font-weight: bold;
-            margin-right: 12px;
-            margin-top: -2px;
-        }
-
-        /* Нижнее меню (Blur effect) */
-        .tab-bar {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 25px;
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-        @media (prefers-color-scheme: dark) {
-            .tab-bar { background: rgba(28, 28, 30, 0.85); }
-        }
-
-        .tab-item {
-            text-align: center;
-            opacity: 0.4;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-        .tab-item.active {
-            opacity: 1;
-            transform: scale(1.05);
-        }
-        .tab-icon {
-            font-size: 24px;
-            display: block;
-            margin-bottom: 2px;
-        }
-        .tab-label {
-            font-size: 10px;
-            font-weight: 500;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-btn { font-size: 26px; opacity: 0.4; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active { opacity: 1; transform: scale(1.15); }
+        
+        .content { display: none; animation: fadeIn 0.2s; }
+        .content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="tab-expense" class="tab-content active">
-        <h1>💸 Новая трата</h1>
-        
+    <div id="tab-expense" class="content active">
+        <h1>💸 Расход</h1>
         <div class="card">
-            <div class="input-group">
-                <label>На что потратили?</label>
-                <input type="text" id="item_name" placeholder="Например: Обед">
-            </div>
-            <div class="input-group">
+            <div class="row"><label>Покупка</label><input type="text" id="title" placeholder="Продукты"></div>
+            <div class="row">
                 <label>Сумма</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="number" id="price" placeholder="0.00" inputmode="decimal" step="0.01" style="flex: 2;">
-                    <select id="currency" style="flex: 1; text-align: right; font-weight: bold; color: var(--accent);">
-                        <option value="AZN">₼ AZN</option>
-                        <option value="RUB">₽ RUB</option>
-                    </select>
+                <div style="display:flex; justify-content:flex-end; width:100%;">
+                    <input type="number" id="price" placeholder="0" style="width:70%;">
+                    <select id="curr" style="width:50px;"><option value="AZN">₼</option><option value="RUB">₽</option></select>
                 </div>
             </div>
-            <div class="input-group">
-                <label>Категория</label>
-                <input type="text" id="category_input" list="default_categories" placeholder="Выберите или напишите...">
-                <datalist id="default_categories"></datalist>
-            </div>
+            <div class="row"><label>Категория</label><input type="text" id="cat" list="cat_list" placeholder="(Пусто)"><datalist id="cat_list"></datalist></div>
         </div>
-
-        <button class="btn-ios" onclick="sendExpense()">Записать расход</button>
+        <button class="btn" onclick="sendExpense()">Записать</button>
     </div>
 
-    <div id="tab-category" class="tab-content">
-        <h1>📂 Правила</h1>
-        <p style="color: var(--text-secondary); margin: -10px 0 20px 5px; font-size: 14px;">Научите бота понимать ваши слова.</p>
-
+    <div id="tab-auto" class="content">
+        <h1>📅 Авто-списание</h1>
+        <p style="color:gray; font-size:13px; margin:-10px 0 15px 5px;">Списывается само каждый месяц</p>
         <div class="card">
-            <div class="input-group">
-                <label>Имя категории</label>
-                <input type="text" id="new_cat_name" placeholder="Например: Ремонт">
-            </div>
-            <div class="input-group">
-                <label>Ключевые слова (через запятую)</label>
-                <input type="text" id="new_cat_words" placeholder="Краска, Обои, Мастер...">
-            </div>
+            <div class="row"><label>Название</label><input type="text" id="auto_name" placeholder="Интернет"></div>
+            <div class="row"><label>Сумма (AZN)</label><input type="number" id="auto_price" placeholder="0"></div>
+            <div class="row"><label>День (1-31)</label><input type="number" id="auto_day" placeholder="1"></div>
         </div>
-
-        <button class="btn-ios" onclick="sendCategory()">Сохранить правило</button>
+        <button class="btn" onclick="sendAuto()">Создать правило</button>
+        <button class="btn" style="background:white; color:var(--blue); margin-top:15px;" onclick="requestAutoList()">📜 Показать список</button>
     </div>
 
-    <div id="tab-actions" class="tab-content">
-        <h1>⚙️ Меню</h1>
-        
+    <div id="tab-cats" class="content">
+        <h1>📂 Категории</h1>
         <div class="card">
-            <div class="input-group" onclick="sendAction('get_stats', 'Загружаю отчет...')">
-                <div style="padding: 16px 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                    <span>📊 Показать статистику</span>
-                    <span style="color: var(--text-secondary); font-size: 20px;">›</span>
-                </div>
-            </div>
-            <div class="input-group" onclick="sendAction('get_file', 'Формирую Excel...')">
-                <div style="padding: 16px 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                    <span>📂 Скачать Excel файл</span>
-                    <span style="color: var(--text-secondary); font-size: 20px;">›</span>
-                </div>
-            </div>
+            <div class="row"><label>Имя</label><input type="text" id="cat_name"></div>
+            <div class="row"><label>Теги</label><input type="text" id="cat_words" placeholder="через запятую"></div>
         </div>
-
-        <div class="card">
-            <div class="input-group" onclick="sendAction('delete_menu', 'Открываю меню удаления...')">
-                <div style="padding: 16px 0; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                    <span style="color: var(--danger);">🗑 Удалить записи</span>
-                    <span style="color: var(--text-secondary); font-size: 20px;">›</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="tab-info" class="tab-content">
-        <h1>ℹ️ О приложении</h1>
-        
-        <div class="card">
-            <div class="info-text">
-                <p><b>Finance Bot App v2.0</b></p>
-                <p style="color: var(--text-secondary); font-size: 13px;">Удобный учет личных финансов с выгрузкой в Excel.</p>
-            </div>
-        </div>
-
-        <h2>Как пользоваться:</h2>
-        <div class="card">
-            <div class="info-text">
-                <div class="step">
-                    <div class="step-num">1</div>
-                    <div><b>Запишите трату:</b> Выберите категорию или напишите свою (например, "Дача"). Бот запомнит её автоматически.</div>
-                </div>
-                <div class="step">
-                    <div class="step-num">2</div>
-                    <div><b>Добавьте правила:</b> Во вкладке "Правила" укажите, что "Бензин" — это "Транспорт". Бот будет подставлять категорию сам.</div>
-                </div>
-                <div class="step">
-                    <div class="step-num">3</div>
-                    <div><b>Анализируйте:</b> Скачивайте Excel-файл с графиками или смотрите статистику прямо в чате.</div>
-                </div>
-            </div>
-        </div>
+        <button class="btn" onclick="sendCategory()">Сохранить</button>
     </div>
 
     <div class="tab-bar">
-        <div class="tab-item active" onclick="switchTab('expense', this)">
-            <span class="tab-icon">💸</span>
-            <span class="tab-label">Траты</span>
-        </div>
-        <div class="tab-item" onclick="switchTab('category', this)">
-            <span class="tab-icon">📂</span>
-            <span class="tab-label">Правила</span>
-        </div>
-        <div class="tab-item" onclick="switchTab('actions', this)">
-            <span class="tab-icon">⚙️</span>
-            <span class="tab-label">Меню</span>
-        </div>
-        <div class="tab-item" onclick="switchTab('info', this)">
-            <span class="tab-icon">ℹ️</span>
-            <span class="tab-label">Инфо</span>
-        </div>
+        <div class="tab-btn active" onclick="switchTab('expense', this)">💸</div>
+        <div class="tab-btn" onclick="switchTab('auto', this)">📅</div>
+        <div class="tab-btn" onclick="switchTab('cats', this)">📂</div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Загрузка категорий из памяти
-        const defaultCategories = ["Еда", "Транспорт", "Офис", "Зарплата", "Прочее"];
-        function loadCategories() {
-            let savedCats = JSON.parse(localStorage.getItem('my_categories')) || [];
-            let allCats = [...new Set([...defaultCategories, ...savedCats])];
-            let dataList = document.getElementById('default_categories');
-            dataList.innerHTML = "";
-            allCats.forEach(cat => {
-                let option = document.createElement('option');
-                option.value = cat;
-                dataList.appendChild(option);
-            });
-        }
-        loadCategories();
-
-        // Переключение вкладок
-        function switchTab(tabId, element) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
+        function switchTab(id, el) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            // Показываем нужную
+            document.getElementById('tab-' + id).classList.add('active');
             
-            document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
+            // Меняем активность кнопок
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
         }
 
-        // Отправка расхода
         function sendExpense() {
-            let item = document.getElementById("item_name").value;
-            let price = document.getElementById("price").value;
-            let currency = document.getElementById("currency").value;
-            let category = document.getElementById("category_input").value;
-
-            if (!item || !price) {
-                Swal.fire({ icon: 'error', title: 'Заполните поля', showConfirmButton: false, timer: 1500, backdrop: `rgba(0,0,0,0.4)` });
-                return;
-            }
-            if (!category) category = "Прочее";
-
-            Swal.fire({ 
-                icon: 'success', 
-                title: 'Сохранено', 
-                text: `${item}: ${price} ${currency}`, 
-                showConfirmButton: false, 
-                timer: 1500,
-                backdrop: `rgba(0,0,0,0.4)`
-            }).then(() => {
-                tg.sendData(JSON.stringify({ action: 'add_expense', title: item, price: price, curr: currency, cat: category }));
-            });
-        }
-
-        // Отправка категории
-        function sendCategory() {
-            let catName = document.getElementById("new_cat_name").value.trim();
-            let wordsStr = document.getElementById("new_cat_words").value;
-
-            if (!catName || !wordsStr) {
-                Swal.fire({ icon: 'warning', title: 'Заполните все поля', showConfirmButton: false, timer: 1500 });
-                return;
-            }
-
-            // Сохраняем в память телефона
-            let savedCats = JSON.parse(localStorage.getItem('my_categories')) || [];
-            let formattedName = catName.charAt(0).toUpperCase() + catName.slice(1);
-            if (!savedCats.includes(formattedName)) {
-                savedCats.push(formattedName);
-                localStorage.setItem('my_categories', JSON.stringify(savedCats));
-                loadCategories();
-            }
-
-            let wordsArray = wordsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            let title = document.getElementById('title').value;
+            let price = document.getElementById('price').value;
+            let curr = document.getElementById('curr').value;
+            let cat = document.getElementById('cat').value || "Прочее";
+            if(!title || !price) return Swal.fire('Ошибка', 'Заполните поля', 'error');
             
-            Swal.fire({ icon: 'success', title: 'Правило создано!', showConfirmButton: false, timer: 1500 }).then(() => {
-                tg.sendData(JSON.stringify({ action: 'add_category', cat_name: formattedName, words: wordsArray }));
-            });
+            tg.sendData(JSON.stringify({ action: 'add_expense', title: title, price: price, curr: curr, cat: cat }));
         }
 
-        // Действия меню
-        function sendAction(actionName, msg) {
-            Swal.fire({ title: msg, showConfirmButton: false, timer: 1000, didOpen: () => { Swal.showLoading() } }).then(() => {
-                tg.sendData(JSON.stringify({ action: actionName }));
-            });
+        function sendAuto() {
+            let name = document.getElementById('auto_name').value;
+            let price = document.getElementById('auto_price').value;
+            let day = document.getElementById('auto_day').value;
+            
+            if(!name || !price || !day) return Swal.fire('Ошибка', 'Заполните все поля', 'error');
+            if(day < 1 || day > 31) return Swal.fire('Ошибка', 'День от 1 до 31', 'error');
+
+            tg.sendData(JSON.stringify({ action: 'add_auto', name: name, price: price, day: day }));
+        }
+
+        function requestAutoList() {
+            tg.sendData(JSON.stringify({ action: 'show_auto_list' }));
+        }
+
+        function sendCategory() {
+            let n = document.getElementById('cat_name').value;
+            let w = document.getElementById('cat_words').value;
+            if(!n) return;
+            tg.sendData(JSON.stringify({ action: 'add_category', cat_name: n, words: w.split(',') }));
         }
     </script>
 </body>
