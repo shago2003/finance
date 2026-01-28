@@ -3,47 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Финансы</title>
+    <title>Finance Dark</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { --bg: #F2F2F7; --card: #FFFFFF; --blue: #007AFF; --text: #000; --gray: #8E8E93; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); margin: 0; padding: 20px; padding-bottom: 90px; user-select: none; -webkit-tap-highlight-color: transparent; }
-        
-        h1 { font-size: 24px; font-weight: 700; margin: 10px 0 20px 5px; }
-        .card { background: var(--card); border-radius: 14px; padding: 0 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        
-        .row { border-bottom: 1px solid #E5E5EA; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
-        .row:last-child { border-bottom: none; }
-        
-        input, select { border: none; font-size: 17px; outline: none; background: transparent; text-align: right; width: 60%; color: var(--blue); font-weight: 500; }
-        label { font-size: 16px; }
-        
-        .btn { width: 100%; padding: 16px; background: var(--blue); color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        .btn:active { opacity: 0.8; transform: scale(0.98); }
-
-        /* Меню снизу */
-        .tab-bar { 
-            position: fixed; bottom: 20px; left: 20px; right: 20px; 
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); 
-            border-radius: 20px; display: flex; justify-content: space-around; 
-            padding: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.15); 
-            z-index: 1000; /* ВАЖНО: Чтобы меню было поверх всего */
+        /* iOS DARK MODE THEME */
+        :root {
+            --bg: #000000;
+            --card: #1C1C1E;
+            --text: #FFFFFF;
+            --text-sec: #8E8E93;
+            --blue: #0A84FF;
+            --red: #FF453A;
+            --separator: #38383A;
+            --input-bg: #2C2C2E;
         }
-        .tab-btn { font-size: 26px; opacity: 0.4; cursor: pointer; transition: 0.2s; }
-        .tab-btn.active { opacity: 1; transform: scale(1.15); }
-        
-        .content { display: none; animation: fadeIn 0.2s; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            padding-bottom: 90px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        h1 { font-size: 28px; font-weight: 800; margin: 10px 0 20px 0; letter-spacing: 0.3px; }
+        h2 { font-size: 13px; color: var(--text-sec); text-transform: uppercase; margin: 25px 0 8px 10px; font-weight: 500; }
+
+        /* Карточки в стиле iOS */
+        .card {
+            background-color: var(--card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--separator);
+            position: relative;
+        }
+        .row:last-child { border-bottom: none; }
+
+        /* Поля ввода */
+        input, select {
+            background: transparent;
+            border: none;
+            color: var(--blue);
+            font-size: 17px;
+            text-align: right;
+            width: 60%;
+            font-weight: 400;
+            outline: none;
+        }
+        input::placeholder { color: #555; }
+        label { font-size: 17px; font-weight: 400; }
+
+        /* Кнопки */
+        .btn {
+            background-color: var(--blue);
+            color: white;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .btn:active { opacity: 0.7; transform: scale(0.98); }
+        .btn-del { color: var(--red); font-weight: 600; cursor: pointer; padding: 5px 10px; }
+
+        /* Вкладки (Tab Bar) */
+        .tab-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(28, 28, 30, 0.9); /* Полупрозрачный черный */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid var(--separator);
+            display: flex; justify-content: space-around;
+            padding: 10px 0 25px 0;
+            z-index: 1000;
+        }
+        .tab-item {
+            display: flex; flex-direction: column; align-items: center;
+            opacity: 0.4; transition: 0.2s; cursor: pointer;
+        }
+        .tab-item.active { opacity: 1; color: var(--blue); }
+        .tab-icon { font-size: 24px; margin-bottom: 2px; }
+        .tab-text { font-size: 10px; font-weight: 500; }
+
+        .content { display: none; animation: fadeIn 0.3s; }
         .content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Теги (Chips) для быстрого выбора */
+        .chip-scroll {
+            display: flex; gap: 8px; overflow-x: auto; padding: 10px 0;
+            scrollbar-width: none;
+        }
+        .chip {
+            background: var(--input-bg); color: var(--text);
+            padding: 8px 16px; border-radius: 20px; font-size: 15px;
+            white-space: nowrap; font-weight: 500; transition: 0.2s; border: 1px solid transparent;
+        }
+        .chip.selected {
+            background: rgba(10, 132, 255, 0.2);
+            color: var(--blue);
+            border: 1px solid var(--blue);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="tab-expense" class="content active">
-        <h1>💸 Расход</h1>
+    <div id="tab-main" class="content active">
+        <h1>Новая трата</h1>
+
+        <h2>Откуда списываем?</h2>
+        <div class="chip-scroll" id="wallet-chips">
+            <div class="chip selected" onclick="selectWallet(this, 'Наличные')">Наличные</div>
+            <div class="chip" onclick="selectWallet(this, 'Карта')">Карта</div>
+        </div>
+        <input type="hidden" id="selected_wallet" value="Наличные">
+
+        <h2>Детали</h2>
         <div class="card">
-            <div class="row"><label>Покупка</label><input type="text" id="title" placeholder="Продукты"></div>
+            <div class="row">
+                <label>На что?</label>
+                <input type="text" id="title" placeholder="Продукты">
+            </div>
             <div class="row">
                 <label>Сумма</label>
                 <div style="display:flex; justify-content:flex-end; width:100%;">
@@ -51,72 +146,124 @@
                     <select id="curr" style="width:50px;"><option value="AZN">₼</option><option value="RUB">₽</option></select>
                 </div>
             </div>
-            <div class="row"><label>Категория</label><input type="text" id="cat" list="cat_list" placeholder="(Пусто)"><datalist id="cat_list"></datalist></div>
+            <div class="row">
+                <label>Категория</label>
+                <input type="text" id="cat" list="cat_list" placeholder="Выбрать...">
+                <datalist id="cat_list"></datalist>
+            </div>
         </div>
-        <button class="btn" onclick="sendExpense()">Записать</button>
+        <button class="btn" onclick="sendExpense()">Записать расход</button>
     </div>
 
     <div id="tab-auto" class="content">
-        <h1>📅 Авто-списание</h1>
-        <p style="color:gray; font-size:13px; margin:-10px 0 15px 5px;">Списывается само каждый месяц</p>
+        <h1>Авто-платежи</h1>
         <div class="card">
             <div class="row"><label>Название</label><input type="text" id="auto_name" placeholder="Интернет"></div>
-            <div class="row"><label>Сумма (AZN)</label><input type="number" id="auto_price" placeholder="0"></div>
+            <div class="row"><label>Сумма</label><input type="number" id="auto_price" placeholder="0"></div>
             <div class="row"><label>День (1-31)</label><input type="number" id="auto_day" placeholder="1"></div>
         </div>
         <button class="btn" onclick="sendAuto()">Создать правило</button>
-        <button class="btn" style="background:white; color:var(--blue); margin-top:15px;" onclick="requestAutoList()">📜 Показать список</button>
+        <button class="btn" style="background:var(--input-bg); margin-top:15px;" onclick="requestAutoList()">📜 Показать список</button>
     </div>
 
-    <div id="tab-cats" class="content">
-        <h1>📂 Категории</h1>
+    <div id="tab-settings" class="content">
+        <h1>Настройки</h1>
+        
+        <h2>Мои Кассы (Кошельки)</h2>
+        <div class="card">
+            <div class="row">
+                <input type="text" id="new_wallet" placeholder="Название (напр. Сейф)" style="text-align:left; width:100%">
+            </div>
+        </div>
+        <button class="btn" onclick="addWallet()" style="margin-top:10px;">Добавить кассу</button>
+        <p style="font-size:12px; color:gray; text-align:center;">Добавленные кассы появятся на главном экране.</p>
+
+        <h2>Добавить Категорию</h2>
         <div class="card">
             <div class="row"><label>Имя</label><input type="text" id="cat_name"></div>
-            <div class="row"><label>Теги</label><input type="text" id="cat_words" placeholder="через запятую"></div>
+            <div class="row"><label>Теги</label><input type="text" id="cat_words" placeholder="еда, вода..."></div>
         </div>
-        <button class="btn" onclick="sendCategory()">Сохранить</button>
+        <button class="btn" onclick="sendCategory()">Сохранить категорию</button>
     </div>
 
     <div class="tab-bar">
-        <div class="tab-btn active" onclick="switchTab('expense', this)">💸</div>
-        <div class="tab-btn" onclick="switchTab('auto', this)">📅</div>
-        <div class="tab-btn" onclick="switchTab('cats', this)">📂</div>
+        <div class="tab-item active" onclick="switchTab('main', this)">
+            <div class="tab-icon">💸</div><div class="tab-text">Расход</div>
+        </div>
+        <div class="tab-item" onclick="switchTab('auto', this)">
+            <div class="tab-icon">📅</div><div class="tab-text">Авто</div>
+        </div>
+        <div class="tab-item" onclick="switchTab('settings', this)">
+            <div class="tab-icon">⚙️</div><div class="tab-text">Настройки</div>
+        </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+        tg.headerColor = '#000000'; // Черная шапка
 
+        // --- ЛОГИКА ВКЛАДОК ---
         function switchTab(id, el) {
-            // Скрываем все вкладки
             document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            // Показываем нужную
             document.getElementById('tab-' + id).classList.add('active');
-            
-            // Меняем активность кнопок
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
         }
 
+        // --- ЛОГИКА КАСС ---
+        function selectWallet(el, name) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('selected_wallet').value = name;
+        }
+
+        // Добавление новой кассы (визуально + отправка боту)
+        function addWallet() {
+            let name = document.getElementById('new_wallet').value;
+            if(!name) return;
+            
+            // Добавляем чип сразу
+            let chipContainer = document.getElementById('wallet-chips');
+            let newChip = document.createElement('div');
+            newChip.className = 'chip';
+            newChip.innerText = name;
+            newChip.onclick = function() { selectWallet(this, name) };
+            chipContainer.appendChild(newChip);
+            
+            // Отправляем боту, чтобы сохранил навсегда
+            tg.sendData(JSON.stringify({ action: 'add_wallet', name: name }));
+            
+            document.getElementById('new_wallet').value = '';
+            Swal.fire({icon: 'success', title: 'Касса добавлена!', timer: 1000, showConfirmButton:false, background: '#1C1C1E', color: '#FFF'});
+        }
+
+        // --- ОТПРАВКА ДАННЫХ ---
         function sendExpense() {
             let title = document.getElementById('title').value;
             let price = document.getElementById('price').value;
             let curr = document.getElementById('curr').value;
             let cat = document.getElementById('cat').value || "Прочее";
-            if(!title || !price) return Swal.fire('Ошибка', 'Заполните поля', 'error');
-            
-            tg.sendData(JSON.stringify({ action: 'add_expense', title: title, price: price, curr: curr, cat: cat }));
+            let wallet = document.getElementById('selected_wallet').value; // Берем выбранную кассу
+
+            if(!title || !price) return Swal.fire({icon:'error', title:'Ошибка', text:'Введите сумму и название', background: '#1C1C1E', color: '#FFF'});
+
+            tg.sendData(JSON.stringify({ 
+                action: 'add_expense', 
+                title: title, 
+                price: price, 
+                curr: curr, 
+                cat: cat,
+                wallet: wallet 
+            }));
         }
 
         function sendAuto() {
-            let name = document.getElementById('auto_name').value;
-            let price = document.getElementById('auto_price').value;
-            let day = document.getElementById('auto_day').value;
-            
-            if(!name || !price || !day) return Swal.fire('Ошибка', 'Заполните все поля', 'error');
-            if(day < 1 || day > 31) return Swal.fire('Ошибка', 'День от 1 до 31', 'error');
-
-            tg.sendData(JSON.stringify({ action: 'add_auto', name: name, price: price, day: day }));
+            let n = document.getElementById('auto_name').value;
+            let p = document.getElementById('auto_price').value;
+            let d = document.getElementById('auto_day').value;
+            if(!n || !p || !d) return;
+            tg.sendData(JSON.stringify({ action: 'add_auto', name: n, price: p, day: d }));
         }
 
         function requestAutoList() {
